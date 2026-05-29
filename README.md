@@ -2,6 +2,14 @@
 
 Install a ready-to-use `next-safe-action` handler setup into your Next.js project.
 
+## Installation
+
+Install the package (optional if you prefer `npx`):
+
+```bash
+npm install -D next-action-handler
+```
+
 ## Usage
 
 Run the installer from the root of your project:
