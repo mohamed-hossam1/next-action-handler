@@ -1,0 +1,25 @@
+{
+  "name": "next-action-handler",
+  "version": "1.0.0",
+  "description": "CLI installer for next-action-handler TypeScript source files.",
+  "bin": {
+    "next-action-handler": "./cli/index.js"
+  },
+  "files": [
+    "cli/",
+    "src/"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "check": "node --check cli/index.js"
+  },
+  "keywords": [
+    "next",
+    "server-actions",
+    "next-safe-action",
+    "cli"
+  ],
+  "license": "MIT"
+}
