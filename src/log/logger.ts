@@ -1,4 +1,5 @@
 import { ERROR_LOG_LEVEL, logger } from "./logger-config";
+import { ActionError } from "../error/errors";
 import type { NormalizedError } from "../types";
 
 type BaseLogOptions = {
@@ -21,6 +22,28 @@ type ActionExecutionLogOptions = BaseLogOptions & {
 type ActionErrorLogOptions = BaseLogOptions & {
   error: NormalizedError;
 };
+
+function buildCauseMeta(
+  cause: NormalizedError["cause"],
+  isDevelopment: boolean,
+) {
+  if (cause instanceof Error) {
+    const isSafeCauseMessage =
+      cause instanceof ActionError ? cause.expose : false;
+
+    return {
+      name: cause.name,
+      message: isDevelopment || isSafeCauseMessage ? cause.message : undefined,
+      stack: isDevelopment ? cause.stack : undefined,
+    };
+  }
+
+  if (isDevelopment) {
+    return cause;
+  }
+
+  return undefined;
+}
 
 export function logWarn({ action, message, meta }: ActionLogMessageOptions) {
   logger.warn(
@@ -74,23 +97,12 @@ export function logActionExecution({
 
 export function logActionError({ action, error }: ActionErrorLogOptions) {
   const level = ERROR_LOG_LEVEL[error.code];
+  const isDevelopment = process.env.NODE_ENV === "development";
 
   const logMeta = {
     errorCode: error.code,
-
-    stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
-
-    cause:
-      error.cause instanceof Error
-        ? {
-            name: error.cause.name,
-            message: error.cause.message,
-            stack:
-              process.env.NODE_ENV === "development"
-                ? error.cause.stack
-                : undefined,
-          }
-        : error.cause,
+    stack: isDevelopment ? error.stack : undefined,
+    cause: buildCauseMeta(error.cause, isDevelopment),
   };
 
   const payload = {

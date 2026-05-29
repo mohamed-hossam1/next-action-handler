@@ -6,10 +6,3 @@ export function toDatabaseError(
 ): DatabaseError {
   return new DatabaseError(message, error);
 }
-
-// use for catch database error
-
-// throw toDatabaseError(
-//     error,
-//     "Failed to create user",
-//   );

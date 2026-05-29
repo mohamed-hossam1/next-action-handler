@@ -15,13 +15,14 @@ export function normalizeError(error: unknown): NormalizedError {
   }
 
   const internalError = new InternalServerError("Something went wrong", error);
+  const unknownCause = error instanceof Error ? error : undefined;
 
   return {
     code: internalError.code,
     message: internalError.message,
     expose: internalError.expose,
 
-    cause: error,
-    stack: error instanceof Error ? error.stack : undefined,
+    cause: unknownCause,
+    stack: unknownCause?.stack,
   };
 }
