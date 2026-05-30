@@ -10,7 +10,19 @@ import {
 import { logActionError, logActionExecution } from "./log/logger";
 
 import { normalizeError } from "./error/normalize-error";
+import { InternalServerError } from "./error/errors";
 import { requireUser } from "../auth-helpers";
+
+const OUTPUT_VALIDATION_SERVER_ERROR_MESSAGE =
+  "Unexpected response. Please try again.";
+
+function isActionOutputDataValidationError(error: unknown): error is Error {
+  return (
+    error instanceof Error &&
+    (error.name === "ActionOutputDataValidationError" ||
+      error.constructor?.name === "ActionOutputDataValidationError")
+  );
+}
 
 export const actionClient = createSafeActionClient({
   defineMetadataSchema: () =>
@@ -19,6 +31,22 @@ export const actionClient = createSafeActionClient({
     }),
 
   handleServerError(error, ctx) {
+    if (isActionOutputDataValidationError(error)) {
+      const normalized = normalizeError(
+        new InternalServerError("Action output validation failed", error),
+      );
+
+      logActionError({
+        action: ctx.metadata.actionName,
+        error: normalized,
+      });
+
+      return {
+        code: normalized.code,
+        message: OUTPUT_VALIDATION_SERVER_ERROR_MESSAGE,
+      };
+    }
+
     const normalized = normalizeError(error);
 
     logActionError({
